@@ -1,0 +1,47 @@
+artifact_path: file:c:/Users/j-a-b/Documents/OpenClassrooms/Projet 5 MH/Notebook/mlruns/1/models/m-def2416ea2724f2b9a8c2b39683dd20b/artifacts
+flavors:
+  python_function:
+    env:
+      conda: conda.yaml
+      virtualenv: python_env.yaml
+    loader_module: mlflow.sklearn
+    model_path: model.pkl
+    predict_fn: predict
+    python_version: 3.13.5
+  sklearn:
+    code: null
+    pickled_model: model.pkl
+    serialization_format: cloudpickle
+    sklearn_version: 1.6.1
+    skops_trusted_types: null
+is_signature_from_type_hint: false
+mlflow_version: 3.10.1
+model_id: m-def2416ea2724f2b9a8c2b39683dd20b
+model_size_bytes: 10524708
+model_uuid: m-def2416ea2724f2b9a8c2b39683dd20b
+prompts: null
+run_id: 6c4cc7c76f7f4d80abd119bf832c80c3
+signature:
+  inputs: '[{"type": "double", "name": "PMVL[PRMP PMVL]", "required": true}, {"type":
+    "double", "name": "PMVL[PMVL Estim\u00e9]", "required": true}, {"type": "double",
+    "name": "PMVL[PFMIndice.Perf J / J-1]", "required": true}, {"type": "double",
+    "name": "PMVL[PRMP VNC]", "required": true}, {"type": "double", "name": "PMVL[Quantity]",
+    "required": true}, {"type": "double", "name": "PMVL[Quote]", "required": true},
+    {"type": "double", "name": "PMVL[PRMP MtM]", "required": true}, {"type": "string",
+    "name": "PMVL[ENTITE]", "required": true}, {"type": "string", "name": "PMVL[Selected
+    Fund code]", "required": true}, {"type": "string", "name": "PMVL[Ref Unik Asset]",
+    "required": true}, {"type": "string", "name": "PMVL[Parametres_Indices.TICKER]",
+    "required": true}, {"type": "string", "name": "PMVL[CIC]", "required": true},
+    {"type": "string", "name": "PMVL[3A]", "required": true}, {"type": "string", "name":
+    "PMVL[Ptf name]", "required": true}, {"type": "string", "name": "Instrument type
+    (Decalog)", "required": true}, {"type": "string", "name": "Issr country", "required":
+    true}, {"type": "string", "name": "Rating S2", "required": true}, {"type": "datetime",
+    "name": "PMVL[Holding date]", "required": true}, {"type": "double", "name": "PRMP_PMVL_tomorrow",
+    "required": true}, {"type": "double", "name": "Ratio_Estimate", "required": true},
+    {"type": "double", "name": "Ratio_Realized", "required": true}, {"type": "double",
+    "name": "Percentage_Error", "required": true}, {"type": "integer", "name": "Holding_Month",
+    "required": true}, {"type": "integer", "name": "Holding_Day", "required": true}]'
+  outputs: '[{"type": "tensor", "tensor-spec": {"dtype": "int64", "shape": [-1]}}]'
+  params: null
+type_hint_from_example: false
+utc_time_created: '2026-04-08 20:18:19.404893'

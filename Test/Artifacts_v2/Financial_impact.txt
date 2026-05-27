@@ -1,0 +1,55 @@
+Objective
+The goal of the analysis was to estimate the financial and operational impact of using a classification model to decide whether a given PMVL estimate can be trusted or should be sent to manual review. The dataset contains position‑level information including realized PMVL, estimated PMVL, mark‑to‑market estimates, and a binary target indicating whether the estimation quality is acceptable.
+
+Methodology
+We modeled the problem as a binary classification task where the model predicts if a PMVL estimate is “good enough” (target = 1) or “bad” (target = 0). The analysis focused on a tuned model (CatBoost) and evaluated several probability thresholds to convert predicted probabilities into class labels. For each threshold, we considered the resulting confusion matrix (TP, TN, FP, FN) and assigned economic costs to false positives and false negatives.
+
+Error Types and Cost Assumptions
+Two types of errors were defined:
+
+False Positive (FP): the model accepts a poor PMVL estimate as if it were correct. This error represents hidden financial risk, because reports and decisions are based on a wrong PMVL.
+
+False Negative (FN): the model rejects a good PMVL estimate and triggers unnecessary manual review, creating operational workload but not direct valuation risk.
+
+For the cost model we assumed:
+
+A typical average PMVL per position of about a few hundred thousand euros, consistent with the range observed in the dataset.
+
+An average relative error of several percent on positions where the estimate is actually bad (target = 0).
+
+A fixed cost per FN representing analyst time and delay costs per manual review case.
+
+These assumptions can be re‑parameterized easily if you prefer to use your own PMVL averages and internal cost estimates.
+
+Results for the Selected Model
+At the chosen operating point (around threshold 0.70 for the CatBoost model), the confusion matrix shows:
+
+A large number of true positives: most truly good estimates are correctly accepted.
+
+A meaningful number of true negatives: many truly bad estimates are correctly flagged for review.
+
+A moderate number of false positives: a limited set of bad estimates that still slip through.
+
+A moderate number of false negatives: a limited set of good estimates that are sent to review unnecessarily.
+
+When we translate this into money using the assumptions above, the model reduces the financial exposure from undetected PMVL errors by several million euros compared with a naïve baseline where all estimates are blindly trusted, at the cost of a manageable number of extra manual reviews.
+
+Threshold Trade‑off
+We then compared multiple probability thresholds:
+
+Lower thresholds (e.g., 0.50) accept more estimates and reduce the number of manual reviews, but allow significantly more bad PMVL estimates to pass undetected, increasing financial risk.
+
+Higher thresholds (e.g., 0.90) are much more conservative, sharply reducing undetected bad estimates but sending many more positions to manual review.
+
+Under reasonable cost assumptions, the purely financial cost (risk + review effort) tends to be minimized at relatively high thresholds, because the risk of wrong PMVL values dominates the relatively small operational cost of additional reviews. However, the final choice of threshold must also consider operational capacity: a very high threshold can overwhelm the review team even if it is financially optimal.
+
+Practical Interpretation
+The analysis demonstrates that a PMVL‑quality classifier, combined with a simple cost model, provides a transparent way to choose an operating threshold:
+
+It quantifies how many bad PMVLs you are willing to accept in exchange for fewer manual reviews.
+
+It shows that using the model is economically much better than relying on PMVL estimates without any control layer.
+
+It provides a framework to regularly revisit the threshold when business costs, portfolio composition, or regulatory constraints change.
+
+If you give me your preferred values for “average PMVL per position” and “cost per manual review”, I can regenerate the same cost table with numbers aligned exactly to your internal economics.

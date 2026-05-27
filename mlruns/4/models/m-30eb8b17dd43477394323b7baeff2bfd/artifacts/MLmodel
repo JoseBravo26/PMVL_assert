@@ -1,0 +1,32 @@
+artifact_path: file:c:/Users/j-a-b/Downloads/OneDrive_1_26-03-2026/mlruns/4/models/m-30eb8b17dd43477394323b7baeff2bfd/artifacts
+flavors:
+  sklearn:
+    code: null
+    pickled_model: model.pkl
+    serialization_format: cloudpickle
+    sklearn_version: 1.8.0
+    skops_trusted_types: null
+is_signature_from_type_hint: false
+mlflow_version: 3.10.1
+model_id: m-30eb8b17dd43477394323b7baeff2bfd
+model_size_bytes: 1570
+model_uuid: m-30eb8b17dd43477394323b7baeff2bfd
+prompts: null
+run_id: 3bbb2fb66fc5460aa730c700de308425
+signature:
+  inputs: '[{"type": "double", "name": "Quantity", "required": true}, {"type": "long",
+    "name": "Inst. Nominal", "required": true}, {"type": "double", "name": "Purch.
+    Val. (clean) (ptf cur.)", "required": true}, {"type": "double", "name": "VNC Agrege
+    dirty (ptf cur.)", "required": true}, {"type": "double", "name": "PRMP MtM", "required":
+    true}, {"type": "double", "name": "PRMP VNC", "required": true}, {"type": "double",
+    "name": "prmp_pmvl", "required": true}, {"type": "double", "name": "mtm_estimated",
+    "required": true}, {"type": "double", "name": "pmvl_estimated", "required": true},
+    {"type": "double", "name": "PFMIndice.Perf J / J-1", "required": true}, {"type":
+    "integer", "name": "holding_dow", "required": true}, {"type": "integer", "name":
+    "holding_month", "required": true}, {"type": "double", "name": "ratio_pmvl_est_real",
+    "required": true}, {"type": "double", "name": "ratio_pmvl_vnc", "required": true}]'
+  outputs: '[{"type": "tensor", "tensor-spec": {"dtype": "float64", "shape": [-1,
+    14]}}]'
+  params: null
+type_hint_from_example: false
+utc_time_created: '2026-04-02 22:06:24.954987'

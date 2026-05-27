@@ -1,0 +1,125 @@
+{
+  "selected_fold": 5,
+  "global_threshold": 0.7,
+  "class_weights": {
+    "1": 0.6963324914900626,
+    "0": 1.7733501118568233
+  },
+  "cv_summary": {
+    "cv_mean_cost_per_sample": 7.301945359647488,
+    "cv_std_cost_per_sample": 3.567911984468472,
+    "cv_mean_total_cost": 15432.4004627241,
+    "cv_mean_f1": 0.3916868741806213,
+    "cv_mean_recall": 0.31920710323698787,
+    "cv_mean_precision": 0.783523308110178,
+    "cv_mean_balanced_accuracy": 0.651322702803147,
+    "cv_mean_roc_auc": 0.8847028652418993,
+    "cv_mean_pr_auc": 0.9348336500516018,
+    "cv_selected_fold": 5,
+    "cv_selected_threshold": 0.7
+  },
+  "test_metrics": {
+    "threshold": 0.7,
+    "accuracy": 0.7111321349731946,
+    "balanced_accuracy": 0.7626356687360109,
+    "precision": 0.9544250132485427,
+    "recall": 0.6845305967312809,
+    "f1": 0.7972554227534308,
+    "mcc": 0.4022282275919746,
+    "tn": 454,
+    "fp": 86,
+    "fn": 830,
+    "tp": 1801,
+    "roc_auc": 0.8486668919014035,
+    "pr_auc": 0.9595680177922454,
+    "brier": 0.1325786788137205,
+    "total_cost": 26974.40063365701,
+    "fp_cost_total": 14524.400633657007,
+    "fn_cost_total": 12450.0,
+    "n_fp": 86,
+    "n_fn": 830,
+    "cost_per_sample": 8.50659118059193
+  },
+  "top_20_features": [
+    {
+      "feature": "PMVL[PRMP VNC]",
+      "importance": 34.67580029942826
+    },
+    {
+      "feature": "PMVL[PRMP PMVL]",
+      "importance": 20.55940240066917
+    },
+    {
+      "feature": "PMVL[PFMIndice.Perf J / J-1]",
+      "importance": 5.981816071649982
+    },
+    {
+      "feature": "PMVL[PMVL Estimée + PRATIC]",
+      "importance": 4.681005347951767
+    },
+    {
+      "feature": "PMVL[CIC]",
+      "importance": 3.942020344561265
+    },
+    {
+      "feature": "PMVL[CANTON]",
+      "importance": 3.7802610674435217
+    },
+    {
+      "feature": "PMVL[Ref Unik Asset]",
+      "importance": 3.6058665164635944
+    },
+    {
+      "feature": "PMVL[Ref Unik Light]",
+      "importance": 3.4397453490739083
+    },
+    {
+      "feature": "PMVL[Ref Unik Codes Completed]",
+      "importance": 3.163877717967387
+    },
+    {
+      "feature": "PMVL[Parametres_Indices.TICKER]",
+      "importance": 3.0468073008222802
+    },
+    {
+      "feature": "PMVL[3A]",
+      "importance": 2.2300117932463577
+    },
+    {
+      "feature": "PMVL[MtM Estimée + PRATIC]",
+      "importance": 2.1978053238755013
+    },
+    {
+      "feature": "PMVL[PRMP MtM]",
+      "importance": 2.1499784969015643
+    },
+    {
+      "feature": "PMVL[Ptf name]",
+      "importance": 2.0287971354162666
+    },
+    {
+      "feature": "position_group",
+      "importance": 1.0053766935710884
+    },
+    {
+      "feature": "PMVL[Quantity]",
+      "importance": 0.9139595442257561
+    },
+    {
+      "feature": "PMVL[MtM Estimé]",
+      "importance": 0.8650640262155175
+    },
+    {
+      "feature": "PMVL[PMVL Estimé]",
+      "importance": 0.7484889856292902
+    },
+    {
+      "feature": "PMVL[Inst. Nominal]",
+      "importance": 0.6534120217679531
+    },
+    {
+      "feature": "PMVL[Inst Num]",
+      "importance": 0.15817064142529036
+    }
+  ]
+}

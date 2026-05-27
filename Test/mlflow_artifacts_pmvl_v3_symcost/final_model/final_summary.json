@@ -1,0 +1,131 @@
+{
+  "cost_function": "symmetric_capped_abs_error",
+  "pmvl_cost_col": "error_abs_pmvl_capped",
+  "selected_fold": 5,
+  "global_threshold": 0.3,
+  "class_weights": {
+    "1": 0.6963324914900626,
+    "0": 1.7733501118568233
+  },
+  "cv_summary": {
+    "cv_mean_cost_per_sample": 40180.04887662736,
+    "cv_std_cost_per_sample": 23530.36679036656,
+    "cv_mean_total_cost": 84909631.66027972,
+    "cv_mean_f1": 0.41639590972917045,
+    "cv_mean_recall": 0.3787451739131299,
+    "cv_mean_precision": 0.5861689710052754,
+    "cv_mean_balanced_accuracy": 0.6757119694544297,
+    "cv_mean_roc_auc": 0.8797400393296269,
+    "cv_mean_pr_auc": 0.9290179555765936,
+    "cv_mean_avg_cost_fp": 668260.521690539,
+    "cv_mean_avg_cost_fn": 84449.95326394531,
+    "cv_selected_fold": 5,
+    "cv_selected_threshold": 0.3
+  },
+  "test_metrics": {
+    "threshold": 0.3,
+    "accuracy": 0.8505203405865658,
+    "balanced_accuracy": 0.6361712910173571,
+    "precision": 0.8717683557394003,
+    "recall": 0.9612314709236032,
+    "f1": 0.9143167028199566,
+    "mcc": 0.36678968020227765,
+    "tn": 168,
+    "fp": 372,
+    "fn": 102,
+    "tp": 2529,
+    "roc_auc": 0.8407769894561989,
+    "pr_auc": 0.9541799015934035,
+    "brier": 0.1416243045661021,
+    "total_cost": 172502536.5997429,
+    "fp_cost_total": 161735231.7978042,
+    "fn_cost_total": 10767304.801938681,
+    "n_fp": 372,
+    "n_fn": 102,
+    "cost_per_sample": 54400.04307781233,
+    "avg_cost_fp": 434772.1284887211,
+    "avg_cost_fn": 105561.81178371255
+  },
+  "top_20_features": [
+    {
+      "feature": "PMVL[PRMP PMVL]",
+      "importance": 28.324456439795792
+    },
+    {
+      "feature": "PMVL[PRMP VNC]",
+      "importance": 14.236780231911572
+    },
+    {
+      "feature": "PMVL[CIC]",
+      "importance": 10.226839809985453
+    },
+    {
+      "feature": "PMVL[MtM Estimée + PRATIC]",
+      "importance": 9.964067553213033
+    },
+    {
+      "feature": "PMVL[CANTON]",
+      "importance": 6.3924303738084705
+    },
+    {
+      "feature": "PMVL[PFMIndice.Perf J / J-1]",
+      "importance": 6.242185471565438
+    },
+    {
+      "feature": "PMVL[Ref Unik Codes Completed]",
+      "importance": 6.223354971910435
+    },
+    {
+      "feature": "PMVL[PMVL Estimée + PRATIC]",
+      "importance": 4.220978137579184
+    },
+    {
+      "feature": "PMVL[Ref Unik Light]",
+      "importance": 3.9890964865640237
+    },
+    {
+      "feature": "PMVL[PRMP MtM]",
+      "importance": 3.39958875152461
+    },
+    {
+      "feature": "PMVL[PMVL Estimé]",
+      "importance": 2.060668472792464
+    },
+    {
+      "feature": "PMVL[Quote]",
+      "importance": 1.3837708271822518
+    },
+    {
+      "feature": "PMVL[Parametres_Indices.TICKER]",
+      "importance": 0.9506072804761624
+    },
+    {
+      "feature": "PMVL[Inst Num]",
+      "importance": 0.9438189487301386
+    },
+    {
+      "feature": "position_group",
+      "importance": 0.5339943696903505
+    },
+    {
+      "feature": "PMVL[Ptf name]",
+      "importance": 0.440864456810227
+    },
+    {
+      "feature": "PMVL[3A]",
+      "importance": 0.3200732557726874
+    },
+    {
+      "feature": "PMVL[Ref Unik Asset]",
+      "importance": 0.14642416068772854
+    },
+    {
+      "feature": "PMVL[GROUPE]",
+      "importance": 0.0
+    },
+    {
+      "feature": "PMVL[RefUnik Position]",
+      "importance": 0.0
+    }
+  ]
+}

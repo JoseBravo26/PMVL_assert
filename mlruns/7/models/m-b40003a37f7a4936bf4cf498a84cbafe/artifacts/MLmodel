@@ -1,0 +1,22 @@
+artifact_path: file:c:/Users/j-a-b/Downloads/OneDrive_1_26-03-2026/mlruns/7/models/m-b40003a37f7a4936bf4cf498a84cbafe/artifacts
+flavors:
+  catboost:
+    catboost_version: 1.2.10
+    code: null
+    data: model.cb
+    model_type: CatBoostClassifier
+    save_format: cbm
+  python_function:
+    data: model.cb
+    env:
+      conda: conda.yaml
+      virtualenv: python_env.yaml
+    loader_module: mlflow.catboost
+    python_version: 3.13.5
+mlflow_version: 3.10.1
+model_id: m-b40003a37f7a4936bf4cf498a84cbafe
+model_size_bytes: 1052528
+model_uuid: m-b40003a37f7a4936bf4cf498a84cbafe
+prompts: null
+run_id: 282ae875eff04904834e995887d29e5a
+utc_time_created: '2026-04-14 10:01:05.287740'

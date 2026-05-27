@@ -1,0 +1,134 @@
+{
+  "cost_function": "asymmetric_p95_capped_abs_error",
+  "pmvl_cost_col": "error_abs_pmvl_capped",
+  "fp_weight": 1.0,
+  "fn_weight": 9.350482074668502,
+  "selected_fold": 5,
+  "global_threshold": 0.45,
+  "class_weights": {
+    "1": 0.6807117676682894,
+    "0": 1.8834184858337204
+  },
+  "cv_summary": {
+    "cv_mean_cost_per_sample": 117232.80491237114,
+    "cv_std_cost_per_sample": 66584.37687265559,
+    "cv_mean_total_cost": 158420772.50042373,
+    "cv_mean_f1": 0.8885604760241212,
+    "cv_mean_recall": 0.94869605064739,
+    "cv_mean_precision": 0.8383914964639821,
+    "cv_mean_balanced_accuracy": 0.7483860762177341,
+    "cv_mean_roc_auc": 0.8532453346511077,
+    "cv_mean_pr_auc": 0.9060635639660335,
+    "cv_mean_avg_cost_fp": 733114.8885577148,
+    "cv_mean_avg_cost_fn": 40533.44134986164,
+    "cv_selected_fold": 5,
+    "cv_selected_threshold": 0.45,
+    "cv_n_valid_folds_recall": 5
+  },
+  "test_metrics": {
+    "threshold": 0.45,
+    "accuracy": 0.8535502958579881,
+    "balanced_accuracy": 0.7301279929383206,
+    "precision": 0.9158328428487346,
+    "recall": 0.9099415204678363,
+    "f1": 0.9128776767380463,
+    "mcc": 0.4539587821279384,
+    "tn": 175,
+    "fp": 143,
+    "fn": 154,
+    "tp": 1556,
+    "roc_auc": 0.8360118062451728,
+    "pr_auc": 0.9549236411159228,
+    "brier": 0.16764188456730109,
+    "total_cost": 157466737.61135292,
+    "fp_cost_total": 59736303.65338346,
+    "fn_cost_total": 97730433.95796946,
+    "n_fp": 143,
+    "n_fn": 154,
+    "cost_per_sample": 77646.32032117994,
+    "avg_cost_fp": 417736.3891844998,
+    "avg_cost_fn": 67869.57105008735
+  },
+  "top_20_features": [
+    {
+      "feature": "PMVL[PRMP PMVL]",
+      "importance": 24.923216530341616
+    },
+    {
+      "feature": "PMVL[PRMP VNC]",
+      "importance": 16.40153669728834
+    },
+    {
+      "feature": "PMVL[CANTON]",
+      "importance": 8.72635785531786
+    },
+    {
+      "feature": "PMVL[PFMIndice.Perf J / J-1]",
+      "importance": 8.671206760112689
+    },
+    {
+      "feature": "PMVL[PMVL Estimé]",
+      "importance": 6.9874589855542855
+    },
+    {
+      "feature": "PMVL[Ref Unik Codes Completed]",
+      "importance": 6.290592081324527
+    },
+    {
+      "feature": "PMVL[CIC]",
+      "importance": 5.582476303959583
+    },
+    {
+      "feature": "PMVL[MtM Estimé]",
+      "importance": 4.4132447008368585
+    },
+    {
+      "feature": "PMVL[PMVL Estimée + PRATIC]",
+      "importance": 3.8924130022105707
+    },
+    {
+      "feature": "PMVL[Quantity]",
+      "importance": 3.7348918727680145
+    },
+    {
+      "feature": "position_group",
+      "importance": 2.206993386284597
+    },
+    {
+      "feature": "PMVL[3A]",
+      "importance": 1.738702741767345
+    },
+    {
+      "feature": "PMVL[PRMP MtM]",
+      "importance": 1.7271690446219305
+    },
+    {
+      "feature": "PMVL[Ref Unik Light]",
+      "importance": 1.3208336127414664
+    },
+    {
+      "feature": "PMVL[Ptf name]",
+      "importance": 1.1257591700441272
+    },
+    {
+      "feature": "PMVL[MtM Estimée + PRATIC]",
+      "importance": 0.7222392792657188
+    },
+    {
+      "feature": "PMVL[Quote]",
+      "importance": 0.5318772330695504
+    },
+    {
+      "feature": "PMVL[Ref Unik Asset]",
+      "importance": 0.41624951568147545
+    },
+    {
+      "feature": "PMVL[Parametres_Indices.TICKER]",
+      "importance": 0.32139961943506457
+    },
+    {
+      "feature": "PMVL[Inst Num]",
+      "importance": 0.26538160737438554
+    }
+  ]
+}

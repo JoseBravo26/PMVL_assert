@@ -1,0 +1,28 @@
+artifact_path: file:c:/Users/j-a-b/Downloads/OneDrive_1_26-03-2026/mlruns/4/models/m-61a066d5ea5e4a0fb5c81a64777e62dc/artifacts
+flavors:
+  sklearn:
+    code: null
+    pickled_model: model.pkl
+    serialization_format: cloudpickle
+    sklearn_version: 1.8.0
+    skops_trusted_types: null
+is_signature_from_type_hint: false
+mlflow_version: 3.10.1
+model_id: m-61a066d5ea5e4a0fb5c81a64777e62dc
+model_size_bytes: 5585
+model_uuid: m-61a066d5ea5e4a0fb5c81a64777e62dc
+prompts: null
+run_id: 1da7f8dd54044060a47b703f8592f17f
+signature:
+  inputs: '[{"type": "string", "name": "GROUPE", "required": true}, {"type": "string",
+    "name": "ENTITE", "required": true}, {"type": "string", "name": "Selected Fund
+    code", "required": true}, {"type": "string", "name": "ISIN", "required": true},
+    {"type": "string", "name": "Orig. name", "required": true}, {"type": "string",
+    "name": "Ptf name", "required": true}, {"type": "string", "name": "Parametres_Indices.TICKER",
+    "required": true}, {"type": "string", "name": "CANTON", "required": true}, {"type":
+    "string", "name": "3A", "required": true}]'
+  outputs: '[{"type": "tensor", "tensor-spec": {"dtype": "float64", "shape": [-1,
+    230]}}]'
+  params: null
+type_hint_from_example: false
+utc_time_created: '2026-04-02 22:09:48.135288'

@@ -1,0 +1,4 @@
+error_type,error_mtm,error_mtm,error_mtm,error_mtm,prob,prob,prob
+,count,sum,mean,std,min,max,mean
+FN,74,9018975.44,121878.05,583927.83,0.01,0.9,0.62
+FP,243,11617147.19,47807.19,498307.85,0.9,1.0,0.97
