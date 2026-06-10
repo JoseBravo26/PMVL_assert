@@ -1,0 +1,23 @@
+artifact_path: "file:c:/Users/M25SK02/OneDrive - SI2M/Documents/Jos\xE9/OpenClassrooms/Projet\
+  \ 7 PMVL asset/mlruns/2/models/m-ded00c30c90f45348d5d7e008a496939/artifacts"
+flavors:
+  catboost:
+    catboost_version: 1.2.10
+    code: null
+    data: model.cb
+    model_type: CatBoostClassifier
+    save_format: cbm
+  python_function:
+    data: model.cb
+    env:
+      conda: conda.yaml
+      virtualenv: python_env.yaml
+    loader_module: mlflow.catboost
+    python_version: 3.12.6
+mlflow_version: 3.12.0
+model_id: m-ded00c30c90f45348d5d7e008a496939
+model_size_bytes: 6085568
+model_uuid: m-ded00c30c90f45348d5d7e008a496939
+prompts: null
+run_id: 67f5d715d7fd4821be055bf8a89328df
+utc_time_created: '2026-06-02 12:36:53.508070'
