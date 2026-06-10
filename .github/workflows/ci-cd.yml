@@ -1,10 +1,11 @@
 name : CI/CD Pipeline PMVL API
 
-#Le pipeline se déclenche à chaque push sur la branche main
+#Le pipeline se déclenche à chaque push sur la branche main or test
 on:
   push:
-    branches: [ main ]
-
+    branches:
+      - main
+      - test
 jobs:
   #Job 1: Exécuter les tests Pytest
   test-api:
