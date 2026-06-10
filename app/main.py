@@ -154,7 +154,7 @@ def run_model_prediction(features: PMVLFeatures) -> PredictionResponse:
     feature_columns = get_feature_columns()
 
     # 1) Récupérer les données brutes
-    raw_dict = features.model_dump(by_alias=True)
+    raw_dict = features.model_dump(by_alias=True, mode="json")
     # Le modèle n'utilise pas directement la date
     raw_dict.pop("PMVL[Holding date]", None)
 
@@ -207,14 +207,14 @@ def predict_pmvl(features: PMVLFeatures):
         # On ajoute une entrée spécifique pour les outputs dans un fichier séparé
         # ou on l'ajoute au fichier principal. Ici, on crée un log d'inférence complet.
         inference_log = {
-            "timestamp": time.strftime("%Y-%m-%dT%H:%M:%S", time.gmtime()),
-            "input_features": features.dict(),
-            "output": {
-                "proba_bonne_estimation": result.proba_bonne_estimation,
-                "prediction": result.prediction,
-                "seuil_applique": result.seuil_applique
-            }
-        }
+    "timestamp": time.strftime("%Y-%m-%dT%H:%M:%S", time.gmtime()),
+    "input_features": features.model_dump(mode="json"),
+    "output": {
+        "proba_bonne_estimation": result.proba_bonne_estimation,
+        "prediction": result.prediction,
+        "seuil_applique": result.seuil_applique,
+    },
+}
         with open(LOG_DIR / "inference_results.jsonl", "a", encoding="utf-8") as f:
             f.write(json.dumps(inference_log) + "\n")
         # ------------------------------------------------

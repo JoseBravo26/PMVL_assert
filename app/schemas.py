@@ -1,4 +1,4 @@
-from pydantic import BaseModel, Field, validator
+from pydantic import BaseModel, Field, ConfigDict
 from typing import Optional
 from datetime import date
 
@@ -123,8 +123,7 @@ class PMVLFeatures(BaseModel):
         description="Nom du portefeuille"
     )
 
-    class Config:
-        populate_by_name = True  # Nouvelle syntaxe Pydantic V2
+    model_config = ConfigDict(populate_by_name=True)
 
 
 class PredictionResponse(BaseModel):
