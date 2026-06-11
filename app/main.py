@@ -40,37 +40,30 @@ PRODUCTION_LOGS_FILE = LOG_DIR / "production_logs.jsonl"
 async def production_logging_middleware(request: Request, call_next):
     """
     Middleware pour logger chaque requête à l'API en production.
-    Idéal pour surveiller la latence, le taux d'erreur et capturer
-    les données pour l'analyse de Data Drift ultérieure.
     """
     start_time = time.time()
     request_id = str(uuid4())
     
-    # On lit le body de la requête (nécessaire pour capturer les inputs)
-    body_bytes = b""
+    # ⚠️ MODIFICATION IMPORTANTE ICI ⚠️
+    # On ne lit le body et on ne loggue QUE si c'est explicitement NOTRE endpoint d'API
     if request.url.path == "/predict" and request.method == "POST":
         body_bytes = await request.body()
         
-    # Fonction pour reconstruire le body afin que les routes suivantes puissent le lire
-    async def receive():
-        return {"type": "http.request", "body": body_bytes}
-    request._receive = receive
-    
-    # Exécution de la requête
-    response = None
-    error_msg = None
-    try:
-        response = await call_next(request)
-        status_code = response.status_code
-    except Exception as e:
-        status_code = 500
-        error_msg = str(e)
-        raise e
-    finally:
-        latency_ms = (time.time() - start_time) * 1000
+        async def receive():
+            return {"type": "http.request", "body": body_bytes}
+        request._receive = receive
         
-        # On ne loggue en détail que les appels à l'endpoint de prédiction
-        if request.url.path == "/predict":
+        try:
+            response = await call_next(request)
+            status_code = response.status_code
+            error_msg = None
+        except Exception as e:
+            status_code = 500
+            error_msg = str(e)
+            raise e
+        finally:
+            latency_ms = (time.time() - start_time) * 1000
+            
             # Extraction des inputs
             input_data = None
             if body_bytes:
@@ -79,7 +72,6 @@ async def production_logging_middleware(request: Request, call_next):
                 except json.JSONDecodeError:
                     input_data = "Unparseable JSON"
             
-            # Préparation du log
             log_entry = {
                 "timestamp": time.strftime("%Y-%m-%dT%H:%M:%S", time.gmtime()),
                 "request_id": request_id,
@@ -90,11 +82,15 @@ async def production_logging_middleware(request: Request, call_next):
                 "error": error_msg
             }
             
-            # Écriture dans le fichier JSONL
             with open(PRODUCTION_LOGS_FILE, "a", encoding="utf-8") as f:
                 f.write(json.dumps(log_entry) + "\n")
                 
-    return response
+        return response
+
+    # ⚠️ Pour toutes les autres routes (incluant l'interface Gradio) ⚠️
+    # On laisse passer la requête normalement sans lire le body pour ne pas bloquer Gradio
+    else:
+        return await call_next(request)
 
 GROUP_KEYS = [
     "PMVL[ENTITE]",
