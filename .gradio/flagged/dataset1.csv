@@ -1,0 +1,11 @@
+Date de la position (AAAA-MM-JJ),PMVL estimée,Quantité,Valeur d'achat clean (ptf),Cotation,VNC agrégée dirty (ptf),Entité,ISIN,Nom original de l'actif,Ticker indice,Réf. unique asset,Code fonds,3A,Canton,CIC,Groupe,Nom du portefeuille,Résultat du modèle,timestamp
+2026-03-01,1500,100,45000,510,49000,ENTITE_TEST,FR0000000001,Asset Name Test,TICKER_TEST,REF_12345,FUND_001,3A_TEST,CANTON_TEST,CIC_TEST,GROUPE_TEST,PTF_TEST,"Probabilité que la PMVL soit une bonne estimation : 3.20%
+Seuil appliqué : 0.45
+
+Décision : Estimation jugée MAUVAISE ⚠️
+Fonds : FUND_001 | Actif : REF_12345",2026-06-11 16:01:14.868983
+2026-03-01,55555551500,65481848,45000,510,49000,ENTITE_TEST,FR0000000001,Asset Name Test,TICKER_TEST,REF_12345,FUND_001,3A_TEST,CANTON_TEST,CIC_TEST,GROUPE_TEST,PTF_TEST,"Probabilité que la PMVL soit une bonne estimation : 22.00%
+Seuil appliqué : 0.45
+
+Décision : Estimation jugée MAUVAISE ⚠️
+Fonds : FUND_001 | Actif : REF_12345",2026-06-11 16:01:40.475477

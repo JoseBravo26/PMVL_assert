@@ -1,18 +1,14 @@
-from fastapi import FastAPI, HTTPException, Request
+from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import RedirectResponse
 import os
 import pandas as pd
 import numpy as np
 import gradio as gr
-
+import time
+from .logging_utils import log_prediction_event
 from .schemas import PMVLFeatures, PredictionResponse
 from .model_loader import get_model, get_feature_columns
-
-import json
-import time
-from uuid import uuid4
-from pathlib import Path
 
 GLOBAL_THRESHOLD_ENV = "GLOBAL_THRESHOLD"
 DEFAULT_THRESHOLD = 0.45
@@ -30,67 +26,6 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
-# On crée le dossier logs s'il n'existe pas
-LOG_DIR = Path("logs")
-LOG_DIR.mkdir(exist_ok=True)
-PRODUCTION_LOGS_FILE = LOG_DIR / "production_logs.jsonl"
-
-@app.middleware("http")
-async def production_logging_middleware(request: Request, call_next):
-    """
-    Middleware pour logger chaque requête à l'API en production.
-    """
-    start_time = time.time()
-    request_id = str(uuid4())
-    
-    # ⚠️ MODIFICATION IMPORTANTE ICI ⚠️
-    # On ne lit le body et on ne loggue QUE si c'est explicitement NOTRE endpoint d'API
-    if request.url.path == "/predict" and request.method == "POST":
-        body_bytes = await request.body()
-        
-        async def receive():
-            return {"type": "http.request", "body": body_bytes}
-        request._receive = receive
-        
-        try:
-            response = await call_next(request)
-            status_code = response.status_code
-            error_msg = None
-        except Exception as e:
-            status_code = 500
-            error_msg = str(e)
-            raise e
-        finally:
-            latency_ms = (time.time() - start_time) * 1000
-            
-            # Extraction des inputs
-            input_data = None
-            if body_bytes:
-                try:
-                    input_data = json.loads(body_bytes.decode("utf-8"))
-                except json.JSONDecodeError:
-                    input_data = "Unparseable JSON"
-            
-            log_entry = {
-                "timestamp": time.strftime("%Y-%m-%dT%H:%M:%S", time.gmtime()),
-                "request_id": request_id,
-                "endpoint": request.url.path,
-                "latency_ms": round(latency_ms, 2),
-                "status_code": status_code,
-                "input_features": input_data,
-                "error": error_msg
-            }
-            
-            with open(PRODUCTION_LOGS_FILE, "a", encoding="utf-8") as f:
-                f.write(json.dumps(log_entry) + "\n")
-                
-        return response
-
-    # ⚠️ Pour toutes les autres routes (incluant l'interface Gradio) ⚠️
-    # On laisse passer la requête normalement sans lire le body pour ne pas bloquer Gradio
-    else:
-        return await call_next(request)
 
 GROUP_KEYS = [
     "PMVL[ENTITE]",
@@ -145,48 +80,73 @@ def load_model_on_startup():
 def run_model_prediction(features: PMVLFeatures) -> PredictionResponse:
     """
     Fonction centrale de prédiction réutilisée par l'API FastAPI et l'UI Gradio.
+    Inclut la génération de logs de production (inputs, outputs, latence).
     """
-    model = get_model()
-    feature_columns = get_feature_columns()
+    start_time = time.perf_counter()
+    status = "success"
+    error_message = None
 
-    # 1) Récupérer les données brutes
-    raw_dict = features.model_dump(by_alias=True, mode="json")
-    # Le modèle n'utilise pas directement la date
-    raw_dict.pop("PMVL[Holding date]", None)
+    try:
+        model = get_model()
+        feature_columns = get_feature_columns()
 
-    # 2) Construire une ligne avec toutes les colonnes attendues
-    row = {col: np.nan for col in feature_columns}
-    for k, v in raw_dict.items():
-        if k in row and v is not None:
-            row[k] = v
+        # 1) Récupérer les données brutes
+        raw_dict = features.model_dump(by_alias=True)
+        raw_dict.pop("PMVL[Holding date]", None)
 
-    raw_df = pd.DataFrame([row])
+        # 2) Construire une ligne avec toutes les colonnes attendues
+        row = {col: np.nan for col in feature_columns}
+        for k, v in raw_dict.items():
+            if k in row and v is not None:
+                row[k] = v
 
-    # 3) Recréer position_group si elle fait partie des features
-    if "position_group" in feature_columns:
-        raw_df["position_group"] = make_position_group(raw_df)
+        raw_df = pd.DataFrame([row])
 
-    # 4) S'assurer de l'ordre exact des colonnes
-    df_input = raw_df[feature_columns]
+        # 3) Recréer position_group si elle fait partie des features
+        if "position_group" in feature_columns:
+            raw_df["position_group"] = make_position_group(raw_df)
 
-    # 5) Nettoyage en utilisant les colonnes catégorielles du modèle
-    cat_indices = model.get_cat_feature_indices()
-    cat_cols = [feature_columns[i] for i in cat_indices]
-    df_input = prepare_catboost_features(df_input, cat_cols)
+        # 4) S'assurer de l'ordre exact des colonnes
+        df_input = raw_df[feature_columns]
 
-    # 6) Prédire
-    proba = float(model.predict_proba(df_input)[:, 1][0])
+        # 5) Nettoyage en utilisant les colonnes catégorielles du modèle
+        cat_indices = model.get_cat_feature_indices()
+        cat_cols = [feature_columns[i] for i in cat_indices]
+        df_input = prepare_catboost_features(df_input, cat_cols)
 
-    threshold = float(os.getenv(GLOBAL_THRESHOLD_ENV, DEFAULT_THRESHOLD))
-    prediction_bool = bool(proba >= threshold)
+        # 6) Prédire
+        proba = float(model.predict_proba(df_input)[:, 1][0])
 
-    return PredictionResponse(
-        proba_bonne_estimation=proba,
-        prediction=prediction_bool,
-        seuil_applique=threshold,
-        fund_code=features.fund_code,
-        ref_unik_asset=features.ref_unik_asset,
-    )
+        threshold = float(os.getenv(GLOBAL_THRESHOLD_ENV, DEFAULT_THRESHOLD))
+        prediction_bool = bool(proba >= threshold)
+
+        response = PredictionResponse(
+            proba_bonne_estimation=proba,
+            prediction=prediction_bool,
+            seuil_applique=threshold,
+            fund_code=features.fund_code,
+            ref_unik_asset=features.ref_unik_asset,
+        )
+        return response
+
+    except Exception as e:
+        status = "error"
+        error_message = str(e)
+        raise
+
+    finally:
+        # 7) Logging structuré dans tous les cas (succès ou erreur)
+        latency_ms = (time.perf_counter() - start_time) * 1000
+        
+        # Formatage des sorties pour le log (mode='json' convertit les objets complexes)
+        outputs_log = response.model_dump(mode='json') if status == "success" else {"error": error_message}
+        
+        log_prediction_event(
+            inputs=features.model_dump(by_alias=True, mode='json'),
+            outputs=outputs_log,
+            status=status,
+            latency_ms=latency_ms,
+        )
 
 @app.get("/health", tags=["diagnostic"])
 def health_check():
@@ -196,26 +156,7 @@ def health_check():
 @app.post("/predict", response_model=PredictionResponse, tags=["prédiction"])
 def predict_pmvl(features: PMVLFeatures):
     try:
-        # Exécution de la prédiction existante
-        result = run_model_prediction(features)
-        
-        # --- NOUVEAU CODE POUR LE LOGGING DES OUTPUTS ---
-        # On ajoute une entrée spécifique pour les outputs dans un fichier séparé
-        # ou on l'ajoute au fichier principal. Ici, on crée un log d'inférence complet.
-        inference_log = {
-    "timestamp": time.strftime("%Y-%m-%dT%H:%M:%S", time.gmtime()),
-    "input_features": features.model_dump(mode="json"),
-    "output": {
-        "proba_bonne_estimation": result.proba_bonne_estimation,
-        "prediction": result.prediction,
-        "seuil_applique": result.seuil_applique,
-    },
-}
-        with open(LOG_DIR / "inference_results.jsonl", "a", encoding="utf-8") as f:
-            f.write(json.dumps(inference_log) + "\n")
-        # ------------------------------------------------
-            
-        return result
+        return run_model_prediction(features)
     except Exception as e:
         raise HTTPException(
             status_code=500,
