@@ -1,3 +1,5 @@
+from pathlib import Path
+
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import RedirectResponse
@@ -163,6 +165,39 @@ def predict_pmvl(features: PMVLFeatures):
             detail=f"Erreur lors du traitement de la prédiction : {e}",
         )
 
+from fastapi.responses import FileResponse
+
+@app.get("/download-logs", tags=["diagnostic"])
+def download_logs():
+    """
+    Route temporaire pour télécharger les logs générés en production sur Hugging Face.
+    """
+    log_file_path = Path("logs/inference_results.jsonl")
+    
+    if log_file_path.exists():
+        return FileResponse(
+            path=log_file_path, 
+            filename="inference_results_HF.jsonl",
+            media_type="application/json"
+        )
+    else:
+        return {"error": "Le fichier de logs n'existe pas encore. Faites des prédictions d'abord."}
+
+@app.get("/download-prod-logs", tags=["diagnostic"])
+def download_prod_logs():
+    """
+    Route temporaire pour télécharger les logs du middleware.
+    """
+    log_file_path = Path("logs/production_logs.jsonl")
+    
+    if log_file_path.exists():
+        return FileResponse(
+            path=log_file_path, 
+            filename="production_logs_HF.jsonl",
+            media_type="application/json"
+        )
+    else:
+        return {"error": "Le fichier de logs de production n'existe pas encore."}
 
 # =========================
 # Interface Gradio /ui
