@@ -1,0 +1,2 @@
+{"timestamp": "2026-06-18T13:31:14", "request_id": "f9b73ef6-2ece-4a4b-b65b-3a9ec6bf49ea", "endpoint": "/gradio_ui", "latency_ms": 10.87, "status_code": 200, "error": null}
+{"timestamp": "2026-06-18T13:44:14", "request_id": "042bd510-03c7-4d01-af0c-04dbabd16975", "endpoint": "/gradio_ui", "latency_ms": 12.2, "status_code": 200, "error": null}

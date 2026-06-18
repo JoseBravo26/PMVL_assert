@@ -1,14 +1,14 @@
 from pathlib import Path
-
 from fastapi import FastAPI, HTTPException
+import time
+import json
+from uuid import uuid4
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import RedirectResponse
+from fastapi.responses import RedirectResponse, FileResponse
 import os
 import pandas as pd
 import numpy as np
 import gradio as gr
-import time
-from .logging_utils import log_prediction_event
 from .schemas import PMVLFeatures, PredictionResponse
 from .model_loader import get_model, get_feature_columns
 
@@ -20,6 +20,14 @@ app = FastAPI(
     description="API exposant le modèle CatBoost pour estimer la précision des PMVL.",
     version="1.0.0",
 )
+
+# =========================
+# Configuration du Logging
+# =========================
+LOG_DIR = Path("logs")
+LOG_DIR.mkdir(exist_ok=True)
+PRODUCTION_LOGS_FILE = LOG_DIR / "production_logs.jsonl"
+INFERENCE_LOGS_FILE = LOG_DIR / "inference_results.jsonl"
 
 app.add_middleware(
     CORSMiddleware,
@@ -58,10 +66,8 @@ def prepare_catboost_features(X: pd.DataFrame, cat_cols: list):
     X = X.copy()
     for c in X.columns:
         if c in cat_cols:
-            # Remplacement des valeurs manquantes par 'MISSING' et conversion en string
             X[c] = X[c].fillna("MISSING").astype(str)
         else:
-            # Remplacement par NaN et forçage numérique
             X[c] = pd.to_numeric(X[c], errors="coerce")
 
     for c in X.columns:
@@ -82,73 +88,42 @@ def load_model_on_startup():
 def run_model_prediction(features: PMVLFeatures) -> PredictionResponse:
     """
     Fonction centrale de prédiction réutilisée par l'API FastAPI et l'UI Gradio.
-    Inclut la génération de logs de production (inputs, outputs, latence).
     """
-    start_time = time.perf_counter()
-    status = "success"
-    error_message = None
+    model = get_model()
+    feature_columns = get_feature_columns()
 
-    try:
-        model = get_model()
-        feature_columns = get_feature_columns()
+    raw_dict = features.model_dump(by_alias=True)
+    raw_dict.pop("PMVL[Holding date]", None)
 
-        # 1) Récupérer les données brutes
-        raw_dict = features.model_dump(by_alias=True)
-        raw_dict.pop("PMVL[Holding date]", None)
+    row = {col: np.nan for col in feature_columns}
+    for k, v in raw_dict.items():
+        if k in row and v is not None:
+            row[k] = v
 
-        # 2) Construire une ligne avec toutes les colonnes attendues
-        row = {col: np.nan for col in feature_columns}
-        for k, v in raw_dict.items():
-            if k in row and v is not None:
-                row[k] = v
+    raw_df = pd.DataFrame([row])
 
-        raw_df = pd.DataFrame([row])
+    if "position_group" in feature_columns:
+        raw_df["position_group"] = make_position_group(raw_df)
 
-        # 3) Recréer position_group si elle fait partie des features
-        if "position_group" in feature_columns:
-            raw_df["position_group"] = make_position_group(raw_df)
+    df_input = raw_df[feature_columns]
 
-        # 4) S'assurer de l'ordre exact des colonnes
-        df_input = raw_df[feature_columns]
+    cat_indices = model.get_cat_feature_indices()
+    cat_cols = [feature_columns[i] for i in cat_indices]
+    df_input = prepare_catboost_features(df_input, cat_cols)
 
-        # 5) Nettoyage en utilisant les colonnes catégorielles du modèle
-        cat_indices = model.get_cat_feature_indices()
-        cat_cols = [feature_columns[i] for i in cat_indices]
-        df_input = prepare_catboost_features(df_input, cat_cols)
+    proba = float(model.predict_proba(df_input)[:, 1][0])
 
-        # 6) Prédire
-        proba = float(model.predict_proba(df_input)[:, 1][0])
+    threshold = float(os.getenv(GLOBAL_THRESHOLD_ENV, DEFAULT_THRESHOLD))
+    prediction_bool = bool(proba >= threshold)
 
-        threshold = float(os.getenv(GLOBAL_THRESHOLD_ENV, DEFAULT_THRESHOLD))
-        prediction_bool = bool(proba >= threshold)
+    return PredictionResponse(
+        proba_bonne_estimation=proba,
+        prediction=prediction_bool,
+        seuil_applique=threshold,
+        fund_code=features.fund_code,
+        ref_unik_asset=features.ref_unik_asset,
+    )
 
-        response = PredictionResponse(
-            proba_bonne_estimation=proba,
-            prediction=prediction_bool,
-            seuil_applique=threshold,
-            fund_code=features.fund_code,
-            ref_unik_asset=features.ref_unik_asset,
-        )
-        return response
-
-    except Exception as e:
-        status = "error"
-        error_message = str(e)
-        raise
-
-    finally:
-        # 7) Logging structuré dans tous les cas (succès ou erreur)
-        latency_ms = (time.perf_counter() - start_time) * 1000
-        
-        # Formatage des sorties pour le log (mode='json' convertit les objets complexes)
-        outputs_log = response.model_dump(mode='json') if status == "success" else {"error": error_message}
-        
-        log_prediction_event(
-            inputs=features.model_dump(by_alias=True, mode='json'),
-            outputs=outputs_log,
-            status=status,
-            latency_ms=latency_ms,
-        )
 
 @app.get("/health", tags=["diagnostic"])
 def health_check():
@@ -157,98 +132,130 @@ def health_check():
 
 @app.post("/predict", response_model=PredictionResponse, tags=["prédiction"])
 def predict_pmvl(features: PMVLFeatures):
+    start_time = time.time()
     try:
-        return run_model_prediction(features)
-    except Exception as e:
-        raise HTTPException(
-            status_code=500,
-            detail=f"Erreur lors du traitement de la prédiction : {e}",
-        )
+        # 1. Prédiction
+        result = run_model_prediction(features)
+        latency_ms = (time.time() - start_time) * 1000
 
-from fastapi.responses import FileResponse
+        # 2. Log Inférence (Inputs/Outputs)
+        inference_log = {
+            "timestamp": time.strftime("%Y-%m-%dT%H:%M:%S", time.gmtime()),
+            "input_features": {k: v for k, v in features.model_dump(by_alias=True).items() if k != "holding_date" and k != "PMVL[Holding date]"},
+            "output": {
+                "proba_bonne_estimation": result.proba_bonne_estimation,
+                "prediction": result.prediction,
+                "seuil_applique": result.seuil_applique
+            }
+        }
+        with open(INFERENCE_LOGS_FILE, "a", encoding="utf-8") as f:
+            f.write(json.dumps(inference_log) + "\n")
+
+        # 3. Log Production (Opérationnel)
+        prod_log = {
+            "timestamp": time.strftime("%Y-%m-%dT%H:%M:%S", time.gmtime()),
+            "request_id": str(uuid4()),
+            "endpoint": "/predict",
+            "latency_ms": round(latency_ms, 2),
+            "status_code": 200,
+            "error": None
+        }
+        with open(PRODUCTION_LOGS_FILE, "a", encoding="utf-8") as f:
+            f.write(json.dumps(prod_log) + "\n")
+
+        return result
+    except Exception as e:
+        latency_ms = (time.time() - start_time) * 1000
+        error_log = {
+            "timestamp": time.strftime("%Y-%m-%dT%H:%M:%S", time.gmtime()),
+            "request_id": str(uuid4()),
+            "endpoint": "/predict",
+            "latency_ms": round(latency_ms, 2),
+            "status_code": 500,
+            "error": str(e)
+        }
+        with open(PRODUCTION_LOGS_FILE, "a", encoding="utf-8") as f:
+            f.write(json.dumps(error_log) + "\n")
+        raise HTTPException(status_code=500, detail=f"Erreur lors du traitement : {e}")
+
 
 @app.get("/download-logs", tags=["diagnostic"])
 def download_logs():
     """
-    Route temporaire pour télécharger les logs générés en production sur Hugging Face.
+    Route pour télécharger les logs d'inférence (inputs/outputs) sur Hugging Face.
     """
-    log_file_path = Path("logs/inference_results.jsonl")
-    
-    if log_file_path.exists():
+    if INFERENCE_LOGS_FILE.exists():
         return FileResponse(
-            path=log_file_path, 
+            path=INFERENCE_LOGS_FILE, 
             filename="inference_results_HF.jsonl",
             media_type="application/json"
         )
-    else:
-        return {"error": "Le fichier de logs n'existe pas encore. Faites des prédictions d'abord."}
+    return {"error": "Le fichier de logs d'inférence n'existe pas encore."}
+
 
 @app.get("/download-prod-logs", tags=["diagnostic"])
 def download_prod_logs():
     """
-    Route temporaire pour télécharger les logs du middleware.
+    Route pour télécharger les logs opérationnels (latence/erreurs) sur Hugging Face.
     """
-    log_file_path = Path("logs/production_logs.jsonl")
-    
-    if log_file_path.exists():
+    if PRODUCTION_LOGS_FILE.exists():
         return FileResponse(
-            path=log_file_path, 
+            path=PRODUCTION_LOGS_FILE, 
             filename="production_logs_HF.jsonl",
             media_type="application/json"
         )
-    else:
-        return {"error": "Le fichier de logs de production n'existe pas encore."}
+    return {"error": "Le fichier de logs de production n'existe pas encore."}
+
 
 # =========================
 # Interface Gradio /ui
 # =========================
 
 def gradio_predict(
-    holding_date,
-    pmvl_estim,
-    quantity,
-    purch_val_clean,
-    quote,
-    vnc_agrege_dirty,
-    entite,
-    isin,
-    orig_name,
-    ticker,
-    ref_unik_asset,
-    fund_code,
-    col_3a,
-    canton,
-    cic,
-    groupe,
-    ptf_name,
+    holding_date, pmvl_estim, quantity, purch_val_clean, quote,
+    vnc_agrege_dirty, entite, isin, orig_name, ticker,
+    ref_unik_asset, fund_code, col_3a, canton, cic, groupe, ptf_name,
 ):
-    """
-    Fonction appelée par l'interface Gradio.
-    Construit un PMVLFeatures puis appelle run_model_prediction.
-    """
+    start_time = time.time()
+    
     features = PMVLFeatures(
-        holding_date=holding_date,
-        pmvl_estim=pmvl_estim,
-        quantity=quantity,
-        purch_val_clean=purch_val_clean,
-        quote=quote,
-        vnc_agrege_dirty=vnc_agrege_dirty,
-        entite=entite,
-        isin=isin,
-        orig_name=orig_name,
-        ticker=ticker,
-        ref_unik_asset=ref_unik_asset,
-        fund_code=fund_code,
-        col_3a=col_3a,
-        canton=canton,
-        cic=cic,
-        groupe=groupe,
-        ptf_name=ptf_name,
+        holding_date=holding_date, pmvl_estim=pmvl_estim, quantity=quantity,
+        purch_val_clean=purch_val_clean, quote=quote, vnc_agrege_dirty=vnc_agrege_dirty,
+        entite=entite, isin=isin, orig_name=orig_name, ticker=ticker,
+        ref_unik_asset=ref_unik_asset, fund_code=fund_code, col_3a=col_3a,
+        canton=canton, cic=cic, groupe=groupe, ptf_name=ptf_name,
     )
 
     resp = run_model_prediction(features)
-    label = "Estimation jugée BONNE ✅" if resp.prediction else "Estimation jugée MAUVAISE ⚠️"
+    latency_ms = (time.time() - start_time) * 1000
 
+    # Log Inférence
+    inference_log = {
+        "timestamp": time.strftime("%Y-%m-%dT%H:%M:%S", time.gmtime()),
+        "input_features": {k: v for k, v in features.model_dump(by_alias=True).items() if k != "holding_date" and k != "PMVL[Holding date]"},
+        "output": {
+            "proba_bonne_estimation": resp.proba_bonne_estimation,
+            "prediction": resp.prediction,
+            "seuil_applique": resp.seuil_applique
+        }
+    }
+    with open(INFERENCE_LOGS_FILE, "a", encoding="utf-8") as f:
+        f.write(json.dumps(inference_log) + "\n")
+
+    # Log Production
+    prod_log = {
+        "timestamp": time.strftime("%Y-%m-%dT%H:%M:%S", time.gmtime()),
+        "request_id": str(uuid4()),
+        "endpoint": "/gradio_ui",
+        "latency_ms": round(latency_ms, 2),
+        "status_code": 200,
+        "error": None
+    }
+    with open(PRODUCTION_LOGS_FILE, "a", encoding="utf-8") as f:
+        f.write(json.dumps(prod_log) + "\n")
+
+    label = "Estimation jugée BONNE ✅" if resp.prediction else "Estimation jugée MAUVAISE ⚠️"
+    
     return (
         f"Probabilité que la PMVL soit une bonne estimation : {resp.proba_bonne_estimation:.2%}\n"
         f"Seuil appliqué : {resp.seuil_applique:.2f}\n\n"
@@ -276,12 +283,11 @@ demo = gr.Interface(
         gr.Textbox(label="Canton", value="CANTON_TEST"),
         gr.Textbox(label="CIC", value="CIC_TEST"),
         gr.Textbox(label="Groupe", value="GROUPE_TEST"),
-        gr.Textbox(label="Nom du portefeuille", value="PTF_TEST"),
+        gr.Textbox(label="Portefeuille", value="PTF_TEST"),
     ],
-    outputs=gr.Textbox(label="Résultat du modèle"),
+    outputs=gr.Textbox(label="Résultat de la prédiction", lines=5),
     title="Scoreur de qualité PMVL",
     description="Interface simple pour évaluer si une estimation PMVL est jugée fiable par le modèle.",
 )
 
-# Montage de Gradio sur l'app FastAPI à la racine /
 app = gr.mount_gradio_app(app, demo, path="/")
