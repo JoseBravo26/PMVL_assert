@@ -5,3 +5,27 @@
 {"timestamp": "2026-06-18T16:23:51", "request_id": "eec46570-ee37-48f6-bf70-f7c261fc0225", "endpoint": "/gradio_ui", "latency_ms": 1.32, "status_code": 200, "error": null}
 {"timestamp": "2026-06-18T16:23:59", "request_id": "4ce8f0b9-b857-468d-90f7-e20350414e0e", "endpoint": "/gradio_ui", "latency_ms": 1.12, "status_code": 200, "error": null}
 {"timestamp": "2026-06-18T16:24:09", "request_id": "b26384fc-78d0-43a0-8b05-cc36f3986bd6", "endpoint": "/gradio_ui", "latency_ms": 1.0, "status_code": 200, "error": null}
+{"timestamp": "2026-06-19T09:31:56", "request_id": "efb57ac8-4768-40f1-a4bb-27e72efbc442", "endpoint": "/predict", "latency_ms": 122.01, "status_code": 200, "error": null}
+{"timestamp": "2026-06-19T09:46:03", "request_id": "15cb54b4-9c42-46d5-a60d-eb4eace26a89", "endpoint": "/predict", "latency_ms": 50.35, "status_code": 200, "error": null}
+{"timestamp": "2026-06-19T09:46:03", "request_id": "9e9cfc57-0101-4ff4-a7d9-2a1ccf1e998a", "endpoint": "/predict", "latency_ms": 0.1, "status_code": 500, "error": "Erreur simul\u00e9e pour les tests"}
+{"timestamp": "2026-06-19T09:52:18", "request_id": "58fe68d4-6bb7-46e9-b255-75496ae5f1e9", "endpoint": "/predict", "latency_ms": 17.0, "status_code": 200, "error": null}
+{"timestamp": "2026-06-19T09:52:18", "request_id": "2f6bfb59-0c32-4088-9350-8a31ac660bf9", "endpoint": "/predict", "latency_ms": 0.11, "status_code": 500, "error": "Erreur simul\u00e9e pour les tests"}
+{"timestamp": "2026-06-19T09:56:06", "request_id": "f22af1b9-36e6-4f29-ad5a-0622e7d8a754", "endpoint": "/predict", "latency_ms": 19.28, "status_code": 200, "error": null}
+{"timestamp": "2026-06-19T09:56:06", "request_id": "533b2399-df4a-4580-916f-86b54b3a4e64", "endpoint": "/predict", "latency_ms": 0.1, "status_code": 500, "error": "Erreur simul\u00e9e pour les tests"}
+{"timestamp": "2026-06-19T09:57:08", "request_id": "7b61de0d-f10e-4063-b59e-8ef43514148d", "endpoint": "/predict", "latency_ms": 18.33, "status_code": 200, "error": null}
+{"timestamp": "2026-06-19T09:57:08", "request_id": "7fb6671a-91aa-403e-9ea0-240f6d6710d2", "endpoint": "/predict", "latency_ms": 0.09, "status_code": 500, "error": "Erreur simul\u00e9e pour les tests"}
+{"timestamp": "2026-06-19T10:07:53", "request_id": "ab099dbf-a078-430b-8fbd-7b207e250008", "endpoint": "/predict", "latency_ms": 57.54, "status_code": 200, "error": null}
+{"timestamp": "2026-06-19T10:07:53", "request_id": "b9ac2a34-11f4-48e9-b8fd-2a353d4b8c57", "endpoint": "/predict", "latency_ms": 0.08, "status_code": 500, "error": "Erreur simul\u00e9e pour les tests"}
+{"timestamp": "2026-06-19T10:26:59", "request_id": "989c2920-725f-4dce-8a22-495988bd72fe", "endpoint": "/predict", "latency_ms": 72.46, "status_code": 200, "error": null}
+{"timestamp": "2026-06-19T10:26:59", "request_id": "376bbae5-b410-4d60-b726-b552cdd5eaba", "endpoint": "/predict", "latency_ms": 0.11, "status_code": 500, "error": "Erreur simul\u00e9e pour les tests"}
+{"timestamp": "2026-06-19T10:27:15", "request_id": "3c084095-e31c-4ee4-a2ea-e0a33cf05ad6", "endpoint": "/predict", "latency_ms": 15.18, "status_code": 200, "error": null}
+{"timestamp": "2026-06-19T10:27:15", "request_id": "e58f416a-653a-4dab-8a14-84b6b2f1a07c", "endpoint": "/predict", "latency_ms": 0.09, "status_code": 500, "error": "Erreur simul\u00e9e pour les tests"}
+{"timestamp": "2026-06-25T16:21:08", "request_id": "edbda315-fdd1-462c-938c-95eab0ff1b06", "endpoint": "/gradio_ui", "latency_ms": 12.52, "status_code": 200, "error": null}
+{"timestamp": "2026-06-25T16:23:59", "request_id": "3cb9c8f2-9cac-4a0c-bba7-1c7855a11ed7", "endpoint": "/predict", "latency_ms": 2.55, "status_code": 200, "error": null}
+{"timestamp": "2026-06-25T16:24:56", "request_id": "268234ac-d6e2-4db4-9826-199db8d665c9", "endpoint": "/predict", "latency_ms": 2.28, "status_code": 200, "error": null}
+{"timestamp": "2026-06-25T16:25:04", "request_id": "3af6e82f-5dcf-4d69-9072-37e95e9e87ae", "endpoint": "/predict", "latency_ms": 1.89, "status_code": 200, "error": null}
+{"timestamp": "2026-06-25T16:25:10", "request_id": "6aaf6564-23c5-4f1e-bc57-976a280ce389", "endpoint": "/predict", "latency_ms": 2.12, "status_code": 200, "error": null}
+{"timestamp": "2026-06-25T16:25:15", "request_id": "b1b7ed6f-dba4-43e5-a84f-79ec612307dd", "endpoint": "/predict", "latency_ms": 1.83, "status_code": 200, "error": null}
+{"timestamp": "2026-06-25T16:25:20", "request_id": "b4bf4bf0-4141-4d17-a8f6-1cccc9fdcabf", "endpoint": "/predict", "latency_ms": 2.02, "status_code": 200, "error": null}
+{"timestamp": "2026-06-25T16:25:25", "request_id": "14f6ba52-66c6-42dc-850e-016c1025aa9f", "endpoint": "/predict", "latency_ms": 1.9, "status_code": 200, "error": null}
+{"timestamp": "2026-06-25T16:25:30", "request_id": "c2e19524-2daf-43a9-9d4e-ca36f874276b", "endpoint": "/predict", "latency_ms": 1.92, "status_code": 200, "error": null}

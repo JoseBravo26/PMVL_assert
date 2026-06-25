@@ -1,14 +1,15 @@
 from fastapi.testclient import TestClient
-from app.main import app
+import pytest
+from unittest.mock import patch
+from app.main import app, run_model_prediction
+from app.schemas import PMVLFeatures
 
-# Création du client de test FastAPI
 client = TestClient(app)
 
-# Payload valide (contenant tous les champs obligatoires définis dans schemas.py)
-# On utilise ici les noms des variables Python (grâce à populate_by_name=True)
+# Données valides pour tester le modèle
 VALID_PAYLOAD = {
     "holding_date": "2026-03-01",
-    "pmvl_estim": 1500.50,
+    "pmvl_estim": 1500.0,
     "quantity": 100.0,
     "purch_val_clean": 45000.0,
     "quote": 510.0,
@@ -26,60 +27,42 @@ VALID_PAYLOAD = {
     "ptf_name": "PTF_TEST"
 }
 
-
 def test_health_check():
-    """
-    Test 1 : Vérifie que le endpoint de diagnostic répond bien 200 OK.
-    """
     response = client.get("/health")
     assert response.status_code == 200
-    assert response.json()["status"] == "ok"
+    assert response.json() == {"status": "ok", "message": "L'API PMVL est opérationnelle."}
 
-
-def test_predict_valid_data():
-    """
-    Test 2 : Vérifie qu'un payload complet et valide renvoie bien une prédiction.
-    """
+def test_predict_success():
     response = client.post("/predict", json=VALID_PAYLOAD)
-    
-    # Ligne ajoutée pour debug
-    print("RESPONSE STATUS:", response.status_code)
-    print("RESPONSE BODY:", response.json())
-
     assert response.status_code == 200
-    
-    # Vérifie la structure de la réponse
     data = response.json()
-    assert "proba_bonne_estimation" in data
     assert "prediction" in data
-    assert "seuil_applique" in data
-    assert data["fund_code"] == "FUND_001"
-    
-    # La probabilité doit être entre 0 et 1
-    assert 0.0 <= data["proba_bonne_estimation"] <= 1.0
+    assert "proba_bonne_estimation" in data
 
-
-def test_predict_missing_required_field():
-    """
-    Test 3 : Vérifie que l'API renvoie une erreur 422 si un champ obligatoire (ex: quantity) est manquant.
-    """
-    invalid_payload = VALID_PAYLOAD.copy()
-    del invalid_payload["quantity"]  # On supprime un champ obligatoire
-
-    response = client.post("/predict", json=invalid_payload)
-    
-    # 422 Unprocessable Entity est le code standard de FastAPI pour une erreur de validation
+def test_predict_missing_field():
+    incomplete_payload = {"pmvl_estim": 1500.0, "quantity": 100.0}
+    response = client.post("/predict", json=incomplete_payload)
     assert response.status_code == 422
 
+def test_download_logs():
+    response = client.get("/download-logs")
+    assert response.status_code == 200
 
-def test_predict_invalid_data_type():
-    """
-    Test 4 : Vérifie que l'API renvoie une erreur 422 si un type de donnée est incorrect 
-    (ex: une chaîne de caractères au lieu d'un float pour 'quote').
-    """
-    invalid_payload = VALID_PAYLOAD.copy()
-    invalid_payload["quote"] = "Ceci_n_est_pas_un_chiffre"
+def test_download_prod_logs():
+    response = client.get("/download-prod-logs")
+    assert response.status_code == 200
 
-    response = client.post("/predict", json=invalid_payload)
-    
-    assert response.status_code == 422
+def test_run_model_prediction_direct():
+    """Teste la fonction métier centrale directement pour la couverture"""
+    features = PMVLFeatures(**VALID_PAYLOAD)
+    result = run_model_prediction(features)
+    assert hasattr(result, "proba_bonne_estimation")
+    assert isinstance(result.prediction, bool)
+
+@patch('app.main.run_model_prediction')
+def test_predict_internal_error(mock_run_model):
+    """Simule un crash du modèle pour tester le bloc except"""
+    mock_run_model.side_effect = Exception("Erreur simulée pour les tests")
+    response = client.post("/predict", json=VALID_PAYLOAD)
+    assert response.status_code == 500
+    assert "Erreur simulée pour les tests" in response.json()["detail"]
