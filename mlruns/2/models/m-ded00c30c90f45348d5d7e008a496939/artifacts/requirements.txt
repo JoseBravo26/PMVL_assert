@@ -1,4 +1,4 @@
-mlflow==3.12.0
+mlflow==3.13.0rc0
 catboost==1.2.10
 ipython==9.13.0
 numpy==2.4.6
